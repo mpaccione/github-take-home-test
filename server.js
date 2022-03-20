@@ -7,12 +7,12 @@ const server = express();
 
 // The tests exercise the server by requiring it as a module,
 // rather than running it in a separate process and listening on a port
-module.exports = server;
+// module.exports = server;
 
 // We'll store the data in memory - Lol no we won't, already started with fs before noticing this xD
 // const storage = {};
 
-// server.use(express.json())
+server.use(express.json())
 
 server.use((req, res, next) => {
 	res.set({
@@ -26,6 +26,10 @@ server.use((req, res, next) => {
 });
 
 // ROUTES
+
+server.get("/ping", (req, res) => {
+  res.sendStatus(200).json({ message: 'pong' })
+})
 
 server.delete("/data/:repository/:objectID", (req, res) => {
   // validate objectID
@@ -41,7 +45,7 @@ server.delete("/data/:repository/:objectID", (req, res) => {
     }
   });
 
-  return res.sendStatus(200).end();
+  res.sendStatus(200).end();
 });
 
 server.get("/data/:repository/:objectID", (req, res) => {
@@ -65,7 +69,7 @@ server.get("/data/:repository/:objectID", (req, res) => {
     }
   );
 
-  return res.sendStatus(200).json(objectData);
+  res.sendStatus(200).json(objectData);
 });
 
 server.put("/data/:repository", (req, res) => {
@@ -103,7 +107,7 @@ server.put("/data/:repository", (req, res) => {
     );
   });
 
-  return res.sendStatus(201).json({ oid, size });
+  res.sendStatus(201).json({ oid, size });
 });
 
 
