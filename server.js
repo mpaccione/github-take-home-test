@@ -32,35 +32,35 @@ server.get("/ping", (req, res) => {
 
 server.delete("/data/:repository/:objectID", (req, res) => {
   // validate objectID
-  if (!uuid.validate(req.query.objectID)) {
-    return res.status(500).json({ message: "Invalid objectID" });
+  if (!uuid.validate(req.params.objectID)) {
+    return res.status(404).json({ message: `Invalid objectID: ${req.params.objectID}` });
   }
 
-  if (!storage[req.query.repository] || !storage[req.query.respository][req.query.objectId]) {
+  if (!storage[req.params.repository] || !storage[req.params.repository][req.params.objectID]) {
     return res
         .status(404)
-        .json({ message: err.message ? err.message : "JSON File Note Found" });
-  } else {6
-    delete storage[req.query.repository][req.query.objectId]
+        .json({ message: "JSON File Not Found" });
+  } else {
+    delete storage[req.params.repository][req.params.objectID]
   }
 
   res.status(200).end();
 });
 
-server.get("/data/:repository/:name", (req, res) => {
-  // validate objectID - apparently we don't use actually UUID at github testing :shrug:
-  // if (!uuid.validate(req.query.name)) {
-  //   return res.status(500).json({ message: "Invalid objectID" });
-  // }
-
-  // check if it exists
-  if (!storage[req.query.repository] || !storage[req.query.repository][req.query.name]) {
-    return res
-        .status(404)
-        .json({ message: err.message ? err.message : "JSON File Not Found" });
+server.get("/data/:repository/:objectID", (req, res) => {
+  // validate objectID 
+  if (!uuid.validate(req.params.objectID)) {
+    return res.status(404).json({ message: `Invalid objectID: ${req.params.objectID}` });
   }
 
-  res.status(200).json(storage[req.query.repository][req.query.name]);
+  // check if it exists
+  if (!storage[req.params.repository] || !storage[req.params.repository][req.params.objectID]) {
+    return res
+        .status(404)
+        .json({ message: "JSON File Not Found" });
+  }
+
+  res.status(200).json(storage[req.params.repository][req.params.objectID]);
 });
 
 server.put("/data/:repository", (req, res) => {
@@ -70,13 +70,16 @@ server.put("/data/:repository", (req, res) => {
   } catch (err) {
     return res
       .status(500)
-      .json({ message: err.message ? err.message : "Invalid JSON submitted" });
+      .json({ message: "Invalid JSON submitted" });
   }
 
   const oid = uuid.v4();
   const size = Buffer.byteLength(JSON.stringify(req.body), 'utf8');
 
-  storage[req.query.repository] = { [oid]: req.body }
+  if (!storage[req.params.repository]) {
+    storage[req.params.repository] = {}
+  }
+  storage[req.params.repository][oid] = req.body
 
   res.status(201).json({ oid, size });
 });
