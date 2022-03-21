@@ -11,6 +11,7 @@ describe('data-storage-api-node', () => {
       .send({ name: 'Ada' })
       .set('Accept', 'application/json')
       .expect('Content-Type', /json/)
+      // .expect(response => { console.log(response) })
       .expect(201)
 
     expect(putResult.body).toBeTruthy()
@@ -28,18 +29,21 @@ describe('data-storage-api-node', () => {
       .put('/data/cats')
       .send({ name: 'Boo' })
       .set('Accept', 'application/json')
+      .expect(response => { console.log(response.res.text) })
       .expect(201)
 
     const putResult2 = await supertest(server)
       .put('/data/cats')
       .send({ name: 'Chester' })
       .set('Accept', 'application/json')
+      .expect(response => { console.log(response.res.text) })
       .expect(201)
 
     expect(putResult1.body.oid).not.toBe(putResult2.body.oid)
 
     await supertest(server)
       .get(`/data/cats/${putResult1.body.oid}`)
+      .expect(response => { console.log(response.res.text) })
       .expect(200)
       .then(response => {
         expect(response.body).toEqual({ name: 'Boo' })
@@ -47,6 +51,7 @@ describe('data-storage-api-node', () => {
 
     await supertest(server)
       .get(`/data/cats/${putResult2.body.oid}`)
+      .expect(response => { console.log(response.res.text) })
       .expect(200)
       .then(response => {
         expect(response.body).toEqual({ name: 'Chester' })
@@ -56,6 +61,7 @@ describe('data-storage-api-node', () => {
   test('GET non-existent object', async () => {
     await supertest(server)
       .get(`/data/cats/noooope`)
+      .expect(response => { console.log(response.res.text) })
       .expect(404)
   })
 
@@ -64,22 +70,26 @@ describe('data-storage-api-node', () => {
       .put('/data/cats')
       .send({ name: 'Daisy' })
       .set('Accept', 'application/json')
+      .expect(response => { console.log(response.res.text) })
       .expect(201)
 
     const hash = putResult.body.oid
 
     await supertest(server)
       .delete(`/data/cats/${hash}`)
+      .expect(response => { console.log(response.res.text) })
       .expect(200)
 
     await supertest(server)
       .get(`/data/cats/${hash}`)
+      .expect(response => { console.log(response.res.text) })
       .expect(404)
   })
 
   test('DELETE non-existent object', async () => {
     await supertest(server)
       .delete(`/data/cats/noooope`)
+      .expect(response => { console.log(response.res.text) })
       .expect(404)
   })
 })

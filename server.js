@@ -40,43 +40,43 @@ server.delete("/data/:repository/:objectID", (req, res) => {
     return res
         .status(404)
         .json({ message: err.message ? err.message : "JSON File Note Found" });
-  } else {
+  } else {6
     delete storage[req.query.repository][req.query.objectId]
   }
 
   res.status(200).end();
 });
 
-server.get("/data/:repository/:objectID", (req, res) => {
-  // validate objectID
-  if (!uuid.validate(req.query.objectID)) {
-    return res.status(500).json({ message: "Invalid objectID" });
-  }
+server.get("/data/:repository/:name", (req, res) => {
+  // validate objectID - apparently we don't use actually UUID at github testing :shrug:
+  // if (!uuid.validate(req.query.name)) {
+  //   return res.status(500).json({ message: "Invalid objectID" });
+  // }
 
   // check if it exists
-  if (!storage[req.query.repository] || !storage[req.query.respository][req.query.objectId]) {
+  if (!storage[req.query.repository] || !storage[req.query.repository][req.query.name]) {
     return res
         .status(404)
-        .json({ message: err.message ? err.message : "JSON File Note Found" });
+        .json({ message: err.message ? err.message : "JSON File Not Found" });
   }
 
-  res.status(200).json(storage[req.query.repository][req.query.objectID]);
+  res.status(200).json(storage[req.query.repository][req.query.name]);
 });
 
 server.put("/data/:repository", (req, res) => {
   // validate json
   try {
-    JSON.parse(req.body);
+    JSON.parse(JSON.stringify(req.body));
   } catch (err) {
     return res
       .status(500)
       .json({ message: err.message ? err.message : "Invalid JSON submitted" });
   }
 
-  const oid = new uuid();
+  const oid = uuid.v4();
   const size = Buffer.byteLength(JSON.stringify(req.body), 'utf8');
 
-  storage[req.query.repository][oid] = JSON.stringify(req.body)
+  storage[req.query.repository] = { [oid]: req.body }
 
   res.status(201).json({ oid, size });
 });
